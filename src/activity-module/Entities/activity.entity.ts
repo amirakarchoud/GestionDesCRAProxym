@@ -1,3 +1,4 @@
+import { CRA } from "src/cramodule/Entities/cra.entity";
 import { Project } from "src/project-module/Entities/project.entity";
 import { User } from "src/user-module/Entities/user.entity";
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
@@ -21,6 +22,9 @@ export class Activity {
 
   @ManyToOne(() => Project)
   project: Project;
+
+  @ManyToOne(() => CRA)
+  cra: CRA;
 
 
 

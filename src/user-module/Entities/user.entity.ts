@@ -3,6 +3,7 @@ import { Role } from "./role.enum";
 import { Absence } from "src/absence-module/Entities/absence.entity";
 import { Activity } from "src/activity-module/Entities/activity.entity";
 import { Project } from "src/project-module/Entities/project.entity";
+import { CRA } from "src/cramodule/Entities/cra.entity";
 
 @Entity()
 export class User {
@@ -24,6 +25,9 @@ export class User {
 
   @ManyToMany(() => Project)
   projects:Project[];
+
+  @OneToMany(() => CRA,(cra) => cra.collab)
+  cras:CRA[];
 
 
   
