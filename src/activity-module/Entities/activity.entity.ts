@@ -1,6 +1,6 @@
-import { CRA } from "src/cramodule/Entities/cra.entity";
-import { Project } from "src/project-module/Entities/project.entity";
-import { User } from "src/user-module/Entities/user.entity";
+import { CRA } from "../../cramodule/Entities/cra.entity";
+import { Project } from "../../project-module/Entities/project.entity";
+import { User } from "../../user-module/Entities/user.entity";
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()

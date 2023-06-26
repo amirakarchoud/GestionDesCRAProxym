@@ -1,7 +1,7 @@
-import { User } from "src/user-module/Entities/user.entity";
+import { User } from "../../user-module/Entities/user.entity";
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Raison } from "./raison.enum";
-import { CRA } from "src/cramodule/Entities/cra.entity";
+import { CRA } from "../../cramodule/Entities/cra.entity";
 
 @Entity()
 export class Absence {
