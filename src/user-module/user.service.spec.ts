@@ -3,7 +3,6 @@ import { User } from "./Entities/user.entity";
 import { UserService } from "./user.service";
 import { Activity } from "../activity-module/Entities/activity.entity";
 import { Absence } from "../absence-module/Entities/absence.entity";
-import { Test, TestingModule } from "@nestjs/testing";
 import { Repository } from "typeorm";
 
 describe('Collaborateur ',()=>{
@@ -18,6 +17,7 @@ describe('Collaborateur ',()=>{
         //given
         const collab= new User();
         const myProject =new Project();
+        collab.activities=[];
  
         //when
         //myProject.addCollab(collab);
@@ -31,7 +31,7 @@ describe('Collaborateur ',()=>{
     it('peut creer une absence ',()=>{
         //given
         const collab= new User();
- 
+        collab.absences=[];
         //when
         userService.addAbsence(collab,new Absence());
         //then

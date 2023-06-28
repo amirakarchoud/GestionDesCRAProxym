@@ -10,7 +10,9 @@ export class Project {
   code: string;
 
   @ManyToMany(() => User)
-  collabs: User[]=[];
+  collabs: User[];
+
+ 
 
 
 }

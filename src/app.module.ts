@@ -1,15 +1,28 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { UserModule } from './user-module/user/user.module';
-import { ProjectModule } from './project-module/project/project.module';
-import { ActivityModule } from './activity-module/activity/activity.module';
-import { AbsenceModule } from './absence-module/absence/absence.module';
-import { CraModule } from './cramodule/cra/cra.module';
-import { HolidayModule } from './holiday-module/holiday/holiday.module';
+import { UserModule } from './user-module/user.module';
+import { ProjectModule } from './project-module/project.module';
+import { ActivityModule } from './activity-module/activity.module';
+import { AbsenceModule } from './absence-module/absence.module';
+import { CraModule } from './cramodule/cra.module';
+import { HolidayModule } from './holiday-module/holiday.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
-  imports: [UserModule, ProjectModule, ActivityModule, AbsenceModule, CraModule, HolidayModule],
+  imports: [TypeOrmModule.forRoot({
+    type: 'mysql',
+    host: 'localhost',
+    port: 3306,
+    username: 'root',
+    password: '',
+    database: 'test',
+    entities: [
+      __dirname + '/../**/*.entity{.ts,.js}',
+  ],
+    synchronize: true,
+  }),UserModule, ProjectModule, ActivityModule, AbsenceModule, CraModule, HolidayModule
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

@@ -18,6 +18,7 @@ describe('Collaborateur ',()=>{
         //given
         const projet=new Project();
         const collab=new User();
+        projet.collabs=[];
         //when
         projectService.addCollab(projet,collab);
 

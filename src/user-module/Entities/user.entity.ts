@@ -17,17 +17,19 @@ export class User {
   role: Role;
 
   @OneToMany(() => Absence,(absence) => absence.collab)
-  absences:Absence[]=[];
+  absences:Absence[];
 
   @OneToMany(() => Activity,(activity) => activity.collab)
-  activities:Activity[]=[];
+  activities:Activity[];
 
 
   @ManyToMany(() => Project)
-  projects:Project[]=[];
+  projects:Project[];
 
   @OneToMany(() => CRA,(cra) => cra.collab)
-  cras:CRA[]=[];
+  cras:CRA[];
+
+
 
 
   

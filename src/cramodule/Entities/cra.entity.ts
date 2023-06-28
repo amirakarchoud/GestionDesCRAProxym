@@ -21,10 +21,11 @@ export class CRA {
   collab: User;
 
   @OneToMany(() => Absence,(absence)=>absence.cra)
-  absences: Absence[]=[];
+  absences: Absence[];
 
   @OneToMany(() => Activity,(activity)=>activity.cra)
-  activities: Activity[]=[];
+  activities: Activity[];
+
 
 
 

@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Holiday } from "./Entities/holiday.entity";
 import { Repository } from "typeorm";
-import * as http from 'http';
+import * as https from 'https';
 import { environment } from "../environment/environment";
 
 @Injectable()
@@ -13,10 +13,12 @@ export class HolidayService {
   ) {}
 
   async fetchAndStoreHolidays(): Promise<Holiday[]> {
-    const url = `${environment.apiUrl}${environment.year}.json`;
+    const year=new Date().getFullYear();
+    const url = `${environment.apiUrl}${year}.json`;
+    console.log(url);
 
     return new Promise<Holiday[]>((resolve, reject) => {
-      http.get(url, (res) => {
+      https.get(url, (res) => {
         let data = '';
 
         res.on('data', (chunk) => {
