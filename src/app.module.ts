@@ -18,7 +18,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     password: '',
     database: 'test',
     entities: [
-      __dirname + '/../**/*.entity{.ts,.js}',
+      __dirname + '/**/*.entity{.ts,.js}',
   ],
     synchronize: true,
   }),UserModule, ProjectModule, ActivityModule, AbsenceModule, CraModule, HolidayModule

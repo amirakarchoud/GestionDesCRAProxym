@@ -1,5 +1,5 @@
 import { User } from "../../user-module/Entities/user.entity";
-import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class Project {
@@ -10,6 +10,7 @@ export class Project {
   code: string;
 
   @ManyToMany(() => User)
+  @JoinTable()
   collabs: User[];
 
  

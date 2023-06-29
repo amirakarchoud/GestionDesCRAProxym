@@ -7,7 +7,7 @@ import { UserModule } from 'src/user-module/user.module';
 import { User } from 'src/user-module/Entities/user.entity';
 
 
-@Module({ imports: [TypeOrmModule.forFeature([CRA]),UserModule,User],
+@Module({ imports: [TypeOrmModule.forFeature([CRA])],
     providers: [CRAService],
     controllers: [CRAController],
     exports: [],

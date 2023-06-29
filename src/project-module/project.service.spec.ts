@@ -2,13 +2,15 @@ import { Repository } from "typeorm";
 import { Project } from "./Entities/project.entity";
 import { ProjectService } from "./project.service";
 import { User } from "../user-module/Entities/user.entity";
+import { UserService } from "../user-module/user.service";
 
 describe('Collaborateur ',()=>{
     let projectService:ProjectService;
+    let userService:UserService;
     let projectRepository: Repository<Project>;
 
     beforeEach(() => {
-        projectService = new ProjectService(projectRepository);
+        projectService = new ProjectService(projectRepository,userService);
       });
 
 
