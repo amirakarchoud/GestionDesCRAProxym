@@ -1,4 +1,4 @@
-import { Controller, Post } from "@nestjs/common";
+import { Controller, Get, Param, Post } from "@nestjs/common";
 import { HolidayService } from "./holiday.service";
 import { Holiday } from "./Entities/holiday.entity";
 
@@ -10,5 +10,13 @@ export class HolidayController {
   async fetchAndStoreHolidays(): Promise<Holiday[]> {
     const currentYear = new Date().getFullYear();
     return this.holidayService.fetchAndStoreHolidays();
+  }
+
+
+  @Get('date/:date')
+  async getAbsencesByDate(@Param('date') date: string): Promise<Holiday[]> {
+    const parsedDate = new Date(date);
+
+    return this.holidayService.getHolidayByDate(parsedDate);
   }
 }

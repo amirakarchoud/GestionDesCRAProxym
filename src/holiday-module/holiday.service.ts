@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Holiday } from "./Entities/holiday.entity";
-import { Repository } from "typeorm";
+import { Between, Repository } from "typeorm";
 import * as https from 'https';
 import { environment } from "../environment/environment";
 
@@ -43,6 +43,18 @@ export class HolidayService {
       }).on('error api', (error) => {
         reject(error);
       });
+    });
+  }
+
+
+  async getHolidayByDate(date: Date): Promise<Holiday[]> {
+    const startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const endDate = new Date(startDate.getTime() + 24 * 60 * 60 * 1000); // Add one day to the start date
+  
+    return this.holidayRepository.find({
+      where: {
+        date: Between(startDate, endDate),
+      },
     });
   }
 }

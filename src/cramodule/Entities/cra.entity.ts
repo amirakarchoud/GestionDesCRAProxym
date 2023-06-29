@@ -9,13 +9,12 @@ export class CRA {
   id: number;
 
   @Column()
-  code: string;
-
-  @Column()
   date: Date;
-
   @Column()
-  matin: boolean;
+  month: number;
+  @Column()
+  year: number;
+
 
   @ManyToOne(() => User)
   collab: User;

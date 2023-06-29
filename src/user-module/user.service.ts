@@ -7,6 +7,9 @@ import { Activity } from "src/activity-module/Entities/activity.entity";
 
 @Injectable()
 export class UserService {
+  getUserById(collabId: number) {
+    throw new Error("Method not implemented.");
+  }
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,

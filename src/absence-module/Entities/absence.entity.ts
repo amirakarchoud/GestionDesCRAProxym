@@ -9,8 +9,6 @@ export class Absence {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  code: string;
 
   @Column()
   date: Date;
