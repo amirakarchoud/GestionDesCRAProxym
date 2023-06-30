@@ -1,7 +1,7 @@
 export class ProjectDTO {
   code: string;
-  collabs: number[]; //a verifier
+  collabs: number[]; 
   constructor() {
-    this.collabs = []; // Initialize the collabs property with an empty array
+    this.collabs = []; 
   }
 }
