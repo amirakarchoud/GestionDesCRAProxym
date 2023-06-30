@@ -2,14 +2,15 @@ import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/commo
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { CRA } from "./Entities/cra.entity";
-import { Absence } from "src/absence-module/Entities/absence.entity";
+import { CreateCraDto } from "./DTO/CreateCraDto";
+import { UserService } from "../user-module/user.service";
 @Injectable()
 export class CRAService {
 
   
   constructor(
     @InjectRepository(CRA)
-    private readonly craRepository: Repository<CRA>,
+    private readonly craRepository: Repository<CRA>,private readonly userService: UserService
   ) {}
 
   async getCRAById(id: number) {
@@ -51,15 +52,26 @@ async checkActivityOrAbsenceExists(id: number, date: Date, matin: boolean): Prom
 }
 
 
-async checkCRAExists(month: number, year: number): Promise<boolean> {
-  const cra = await this.craRepository.findOne({ where: { month, year } });
+async checkCRAExists(month: number, year: number,collabId:number): Promise<boolean> {
+  const cra = await this.craRepository.findOne({ where: { month, year,collab: { id: collabId } } });
   return !!cra; 
 }
 
+async createCra(createCraDto: CreateCraDto): Promise<CRA> {
+console.log('craeting cra');
+    const { year, month, collab, date } = createCraDto;
 
+    const cra = new CRA();
+    cra.year = year;
+    cra.month = month;
+    cra.date = date || new Date();
+    cra.collab = await this.userService.findById(collab);
+    cra.absences = [];
+    cra.activities = [];
 
-async createCra(cra:CRA): Promise<CRA> {
-  return this.craRepository.save(cra);
+    const createdCra = await this.craRepository.save(cra);
+    return createdCra;
+  
 }
 
 

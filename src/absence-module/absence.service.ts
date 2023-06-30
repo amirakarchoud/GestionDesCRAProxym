@@ -1,13 +1,13 @@
 import { Absence } from "./Entities/absence.entity";
-import { HttpException, HttpStatus, Injectable, NotFoundException } from "@nestjs/common";
+import { ForbiddenException, HttpException, HttpStatus, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { CRAService } from "../cramodule/cra.service";
 import { UserService } from "../user-module/user.service";
 import { Between, Repository } from "typeorm";
 import { CreateAbsenceDto } from "./DTO/CreateAbsenceDTO";
 import { UpdateAbsenceDto } from "./DTO/updateAbsenceDTO";
-import { HolidayService } from "src/holiday-module/holiday.service";
-import { CRA } from "src/cramodule/Entities/cra.entity";
+import { HolidayService } from "../holiday-module/holiday.service";
+import { CreateCraDto } from "../cramodule/DTO/CreateCraDto";
 @Injectable()
 export class AbsenceService {
   constructor(
@@ -22,6 +22,7 @@ export class AbsenceService {
   }
 
   async createAbsence(createAbsenceDto: CreateAbsenceDto): Promise<Absence> {
+    console.log('creating absence');
     //console.log(createAbsenceDto.date);
     const dateAbs=new Date(createAbsenceDto.date);
     //Test holiday
@@ -32,37 +33,62 @@ export class AbsenceService {
       throw new HttpException(`It's a holiday (${holidayNames})!`, HttpStatus.BAD_REQUEST);
     }
 
-    //test cra exists
-    if (!this.craService.checkCRAExists(dateAbs.getMonth(),dateAbs.getFullYear()))
-    { const cra=new CRA();
-      cra.month=dateAbs.getMonth();
-      cra.year=dateAbs.getFullYear();
-     await this.craService.createCra(cra);
+    let craId: number = createAbsenceDto.craId;
+    console.log('cra id before= '+craId);
+
+    // Check if the specified CRA exists
+    if ((await this.craService.checkCRAExists(dateAbs.getMonth(), dateAbs.getFullYear(),createAbsenceDto.collabId))) {
+      console.log('checked cra doesnt exist');
+      // Create a new CRA if it doesnt exist
+      const createCraDto: CreateCraDto = {
+        year: dateAbs.getFullYear(),
+        month: dateAbs.getMonth()+1,
+        collab: createAbsenceDto.collabId,
+        date: new Date(),
+      };
+
+      console.log('created cra dto ='+ createCraDto);
+  
+      try {
+        const createdCra = await this.craService.createCra(createCraDto);
+        craId = createdCra.id;
+      } catch (error) {
+        console.error('Error creating CRA:', error);
+        throw new HttpException('Failed to create CRA', HttpStatus.INTERNAL_SERVER_ERROR);
+      }
     }
-    else {
-
-    //test if that day is full or already full period
-
-   
-
-
-    //test in cra : same month and year
-
-    }
-
-     //test dates of adding
-
-
-
+  
+    
+  
     const absence = new Absence();
-  absence.date = createAbsenceDto.date;
-  absence.matin = createAbsenceDto.matin;
-  absence.raison = createAbsenceDto.raison;
-  absence.collab = await this.userService.findById(createAbsenceDto.collabId);
-  absence.cra = await this.craService.getCRAById(createAbsenceDto.craId);
+    absence.date = createAbsenceDto.date;
+    absence.matin = createAbsenceDto.matin;
+    absence.raison = createAbsenceDto.raison;
+    absence.collab = await this.userService.findById(createAbsenceDto.collabId);
+    
+    if (craId !== createAbsenceDto.craId) {
+      absence.cra = await this.craService.getCRAById(craId);
+    } else {
+      absence.cra = await this.craService.getCRAById(createAbsenceDto.craId);
+    }
+    // Test in the CRA for the same month and year
+    if(absence.cra.month!=absence.date.getMonth()+1 || absence.cra.year!=absence.date.getFullYear())
+    {
+      throw new HttpException('Not in this CRA', HttpStatus.BAD_REQUEST);
+    }
 
-  return this.absenceRepository.save(absence);
+    // Test if the day is already fully occupied or part of a fully occupied period
+    if(this.craService.checkActivityOrAbsenceExists(absence.cra.id,absence.date,absence.matin))
+    {
+      throw new HttpException('FULL day or period', HttpStatus.BAD_REQUEST);
+    }
+    
+  
+    return this.absenceRepository.save(absence);
   }
+
+
+
 
   async deleteAbsence(id: number): Promise<void> {
      this.absenceRepository.delete(id);
@@ -135,6 +161,21 @@ export class AbsenceService {
         date: Between(startDate, endDate),
       },
     });
+  }
+
+
+  //to add later to the logic
+  //testing if we are currently in the same month or only 5 days after the end of the last month
+  checkAddingUpdatingDate(month:number,year:number):boolean{
+    const today=new Date();
+    let beforeFiveDays = new Date(); //fel CRA
+    beforeFiveDays.setDate(today.getDate()-5);
+    
+    if ( (month!=today.getMonth() && beforeFiveDays.getMonth() != month))
+
+       { //throw new ForbiddenException('Not allowed to update at this time !');
+        return false;}
+        return true;
   }
 
 
