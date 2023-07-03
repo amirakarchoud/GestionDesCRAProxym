@@ -1,13 +1,15 @@
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable, NotFoundException } from "@nestjs/common";
 import { Activity } from "./Entities/activity.entity";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { Between, Repository } from "typeorm";
 import { UserService } from "../user-module/user.service";
 import { ProjectService } from "../project-module/project.service";
 import { CRAService } from "../cramodule/cra.service";
 import { HolidayService } from "../holiday-module/holiday.service";
 import { CreateActivityDto } from "./DTO/CreateActivityDto";
 import { CreateCraDto } from "../cramodule/DTO/CreateCraDto";
+import { Project } from "src/project-module/Entities/project.entity";
+import { User } from "src/user-module/Entities/user.entity";
 
 @Injectable()
 export class ActivityService {
@@ -22,7 +24,6 @@ export class ActivityService {
   async getAllActivities(): Promise<Activity[]> {
     return this.activityRepository.find();
   }
-
 
 
   async createActivity(createActivityDto: CreateActivityDto): Promise<Activity> {
@@ -66,6 +67,13 @@ export class ActivityService {
     activity.date = createActivityDto.date;
     activity.matin = createActivityDto.matin;
     activity.collab = await this.userService.findById(createActivityDto.collabId);
+    activity.project= await this.projectService.findById(createActivityDto.projectId);
+
+    if(!this.collabInProject(activity.project,activity.collab))
+    {
+      throw new HttpException('Collab does not belong in the selected project', HttpStatus.BAD_REQUEST);
+    }
+    
 
     if (craId !== createActivityDto.craId) {
       activity.cra = await this.craService.getCRAById(craId);
@@ -86,7 +94,66 @@ export class ActivityService {
     return this.activityRepository.save(activity);
   }
 
+  collabInProject(project: Project, collab: User): boolean {
+    const collabIds = project.collabs.map((collab) => collab.id);
+    return collabIds.includes(collab.id);
+  }
+
+
+
+
+  async deleteActivity(id: number): Promise<void> {
+    this.activityRepository.delete(id);
+ }
+
+ async getActivityById(id: number): Promise<Activity> {
+   const absence = await this.activityRepository.findOne({ where: { id },relations: ['collab','cra','project'] });
+ if (!absence) {
+   throw new NotFoundException('Activity not found');
+ }
+ return absence;
+ }
+
  
+
+ async getActivitiesByDate(date: Date): Promise<Activity[]> {
+  const startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const endDate = new Date(startDate.getTime() + 24 * 60 * 60 * 1000); 
+
+  return this.activityRepository.find({
+    where: {
+      date: Between(startDate, endDate),
+    },
+  });
+}
+
+
+async getActivitiesByUserAndDate(userId: number, date: Date): Promise<Activity[]> {
+  const startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const endDate = new Date(startDate.getTime() + 24 * 60 * 60 * 1000); 
+
+  return this.activityRepository.find({
+    where: {
+      collab: { id: userId },
+      date: Between(startDate, endDate),
+    },
+  });
+}
+
+
+async getActivitiesByUserAndMonthYear(userId: number, month: number, year: number): Promise<Activity[]> {
+  const startDate = new Date(year, month - 1, 1);
+  const endDate = new Date(year, month, 0, 23, 59, 59);
+
+  const activities = await this.activityRepository.find({
+    where: {
+      collab: { id: userId },
+      date: Between(startDate, endDate),
+    },
+  });
+
+  return activities;
+}
 
 
 }
