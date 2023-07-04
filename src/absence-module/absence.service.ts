@@ -36,8 +36,10 @@ export class AbsenceService {
     let craId: number = createAbsenceDto.craId;
     console.log('cra id before= '+craId);
 
+    const absence = new Absence();
+
     // Check if the specified CRA exists
-    if ((await this.craService.checkCRAExists(dateAbs.getMonth(), dateAbs.getFullYear(),createAbsenceDto.collabId))) {
+    if (!(await this.craService.checkCRAExists(dateAbs.getMonth(), dateAbs.getFullYear(),createAbsenceDto.collabId))) {
       console.log('checked cra doesnt exist');
       // Create a new CRA if it doesnt exist
       const createCraDto: CreateCraDto = {
@@ -52,33 +54,34 @@ export class AbsenceService {
       try {
         const createdCra = await this.craService.createCra(createCraDto);
         craId = createdCra.id;
+        absence.cra = await this.craService.getCRAById(craId);
+     
       } catch (error) {
         console.error('Error creating CRA:', error);
         throw new HttpException('Failed to create CRA', HttpStatus.INTERNAL_SERVER_ERROR);
       }
     }
-  
+    else
+    {
+      console.log('searching for the corresponding cra');
+      absence.cra= (await this.craService.findOne(dateAbs.getMonth(), dateAbs.getFullYear(), createAbsenceDto.collabId));
+    }
     
   
-    const absence = new Absence();
+    
     absence.date = createAbsenceDto.date;
     absence.matin = createAbsenceDto.matin;
     absence.raison = createAbsenceDto.raison;
     absence.collab = await this.userService.findById(createAbsenceDto.collabId);
     
-    if (craId !== createAbsenceDto.craId) {
-      absence.cra = await this.craService.getCRAById(craId);
-    } else {
-      absence.cra = await this.craService.getCRAById(createAbsenceDto.craId);
-    }
     // Test in the CRA for the same month and year
-    if(absence.cra.month!=absence.date.getMonth()+1 || absence.cra.year!=absence.date.getFullYear())
+    if(absence.cra.month!=dateAbs.getMonth()+1 || absence.cra.year!=dateAbs.getFullYear())
     {
       throw new HttpException('Not in this CRA', HttpStatus.BAD_REQUEST);
     }
 
     // Test if the day is already fully occupied or part of a fully occupied period
-    if(this.craService.checkActivityOrAbsenceExists(absence.cra.id,absence.date,absence.matin))
+    if(await this.craService.checkActivityOrAbsenceExists(absence.cra.id,dateAbs,absence.matin))
     {
       throw new HttpException('FULL day or period', HttpStatus.BAD_REQUEST);
     }

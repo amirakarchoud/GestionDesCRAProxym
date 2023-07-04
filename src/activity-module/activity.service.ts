@@ -8,8 +8,8 @@ import { CRAService } from "../cramodule/cra.service";
 import { HolidayService } from "../holiday-module/holiday.service";
 import { CreateActivityDto } from "./DTO/CreateActivityDto";
 import { CreateCraDto } from "../cramodule/DTO/CreateCraDto";
-import { Project } from "src/project-module/Entities/project.entity";
-import { User } from "src/user-module/Entities/user.entity";
+import { Project } from "../project-module/Entities/project.entity";
+import { User } from "../user-module/Entities/user.entity";
 
 @Injectable()
 export class ActivityService {
@@ -39,9 +39,12 @@ export class ActivityService {
 
     let craId: number = createActivityDto.craId;
     console.log('cra id before= ' + craId);
+    const activity = new Activity();
 
     // Check if the specified CRA exists
-    if (!(await this.craService.checkCRAExists(dateActivity.getMonth(), dateActivity.getFullYear(), createActivityDto.collabId))) {
+    if (!(await this.craService.checkCRAExists(dateActivity.getMonth(), dateActivity.getFullYear(), createActivityDto.collabId)) )
+     {
+      console.log('creating cra because it doesnt exist');
       console.log('checked cra doesnt exist');
       // Create a new CRA if it doesnt exist
       const createCraDto: CreateCraDto = {
@@ -49,21 +52,28 @@ export class ActivityService {
         month: dateActivity.getMonth() + 1,
         collab: createActivityDto.collabId,
         date: new Date(),
-      };
+      }
+      
 
       console.log('created cra dto =' + createCraDto);
 
       try {
         const createdCra = await this.craService.createCra(createCraDto);
         craId = createdCra.id;
+        activity.cra = await this.craService.getCRAById(craId);
       } catch (error) {
         console.error('Error creating CRA:', error);
         throw new HttpException('Failed to create CRA', HttpStatus.INTERNAL_SERVER_ERROR);
       }
     }
+    else
+      {
+        console.log('searching for the corresponding cra');
+        activity.cra= (await this.craService.findOne(dateActivity.getMonth(), dateActivity.getFullYear(), createActivityDto.collabId));
+        console.log('cra found '+activity.cra.id);
+      }
 
-    const activity = new Activity();
-    activity.code = createActivityDto.code;
+    
     activity.date = createActivityDto.date;
     activity.matin = createActivityDto.matin;
     activity.collab = await this.userService.findById(createActivityDto.collabId);
@@ -74,20 +84,25 @@ export class ActivityService {
       throw new HttpException('Collab does not belong in the selected project', HttpStatus.BAD_REQUEST);
     }
     
-
+/*
     if (craId !== createActivityDto.craId) {
       activity.cra = await this.craService.getCRAById(craId);
     } else {
       activity.cra = await this.craService.getCRAById(createActivityDto.craId);
     }
+    */
 
     // Test in the CRA for the same month and year
-    if (activity.cra.month != activity.date.getMonth() + 1 || activity.cra.year != activity.date.getFullYear()) {
+    if (activity.cra.month != dateActivity.getMonth()+1 || activity.cra.year != dateActivity.getFullYear()) {
       throw new HttpException('Not in this CRA', HttpStatus.BAD_REQUEST);
     }
 
     // Test if the day is already fully occupied or part of a fully occupied period
-    if (this.craService.checkActivityOrAbsenceExists(activity.cra.id, activity.date, activity.matin)) {
+    console.log('activity.cra.id= '+activity.cra.id);
+    console.log('dateActivity= '+dateActivity);
+    console.log('activity.matin= '+activity.matin);
+    console.log('val retour= '+ await this.craService.checkActivityOrAbsenceExists(activity.cra.id, dateActivity, activity.matin));
+    if (await this.craService.checkActivityOrAbsenceExists(activity.cra.id, dateActivity, activity.matin)) {
       throw new HttpException('FULL day or period', HttpStatus.BAD_REQUEST);
     }
 

@@ -115,7 +115,7 @@ describe('CRAService', () => {
     });
 
     describe('checkCRAExists', () => {
-        const month = 6;
+        let month = 6;
         const year = 2023;
         const collabId = 1;
         const existingCRA = {} as CRA;
@@ -126,6 +126,7 @@ describe('CRAService', () => {
             const result = await craService.checkCRAExists(month, year, collabId);
 
             expect(result).toBe(true);
+            month++;
             expect(craRepository.findOne).toHaveBeenCalledWith({ where: { month, year, collab: { id: collabId } } });
         });
 
@@ -133,7 +134,7 @@ describe('CRAService', () => {
             jest.spyOn(craRepository, 'findOne').mockResolvedValue(undefined);
 
             const result = await craService.checkCRAExists(month, year, collabId);
-
+            month++;
             expect(result).toBe(false);
             expect(craRepository.findOne).toHaveBeenCalledWith({ where: { month, year, collab: { id: collabId } } });
         });

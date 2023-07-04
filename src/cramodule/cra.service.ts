@@ -4,9 +4,15 @@ import { Repository } from "typeorm";
 import { CRA } from "./Entities/cra.entity";
 import { CreateCraDto } from "./DTO/CreateCraDto";
 import { UserService } from "../user-module/user.service";
+import e from "express";
 @Injectable()
 export class CRAService {
 
+ async findOne(month: number, year: number, collabId: number):Promise<CRA> {
+  month++;
+    return await this.craRepository.findOne({ where: { month, year,collab: { id: collabId } } });
+  }
+  
   
   constructor(
     @InjectRepository(CRA)
@@ -35,17 +41,34 @@ formatDate(date: Date): string {
 
 async checkActivityOrAbsenceExists(id: number, date: Date, matin: boolean): Promise<boolean> {
   const existingCRA = await this.craRepository.findOne( { where:{id},relations: ['activities', 'absences'] });
+  //console.log('existingCRA absence= '+existingCRA.absences);
+ // console.log('existingCRA activities= '+existingCRA.activities);
 
   if (existingCRA) {
-    const existingActivity = existingCRA.activities.find((activity) => activity.date === date && activity.matin === matin);
+    const existingActivity = existingCRA.activities.find((activity) => this.formatDate(activity.date) === this.formatDate(date) && activity.matin === matin);
+    console.log('existingActivity= '+existingActivity);
     if (existingActivity) {
+      console.log('found activity');
       return true;
     }
 
-    const existingAbsence = existingCRA.absences.find((absence) => absence.date === date && absence.matin === matin);
+    const existingAbsence = existingCRA.absences.find((absence) => this.formatDate(absence.date) === this.formatDate(date) && absence.matin === matin);
+    console.log('existingAbsence= '+existingAbsence);
     if (existingAbsence) {
+      console.log('found absence');
+      
       return true;
     }
+
+
+    const activities = existingCRA.activities.filter((activity) => this.formatDate(activity.date) === this.formatDate(date) );
+    const absences = existingCRA.absences.filter((absence) => this.formatDate(absence.date) === this.formatDate(date) );
+  if (activities.length+absences.length>1)
+  {
+    return true;
+  }
+    
+    
   }
 
   return false;
@@ -53,6 +76,10 @@ async checkActivityOrAbsenceExists(id: number, date: Date, matin: boolean): Prom
 
 
 async checkCRAExists(month: number, year: number,collabId:number): Promise<boolean> {
+  console.log('check cra month :'+month);
+  console.log('check cra year :'+year);
+  console.log('check cra collab id :'+collabId);
+  month++;
   const cra = await this.craRepository.findOne({ where: { month, year,collab: { id: collabId } } });
   return !!cra; 
 }
@@ -73,6 +100,21 @@ console.log('craeting cra');
     return createdCra;
   
 }
+
+
+async verifyUserCra(month: number, year: number, collabId: number, id: number): Promise<boolean> {
+  const cra = await this.craRepository.findOne({
+    where: { id },
+    relations: ['collab']
+  });
+
+  if (!cra || cra.collab.id !== collabId || cra.month !== month || cra.year !== year) {
+    return false;
+  }
+
+  return true;
+}
+
 
 
 }

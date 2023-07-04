@@ -8,8 +8,6 @@ export class Activity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  code: string;
 
   @Column()
   date: Date;
