@@ -11,6 +11,12 @@ export class User {
   id: number;
 
   @Column()
+  email:string;
+
+  @Column()
+  password:string;
+
+  @Column()
   name: string;
 
   @Column('enum', { default: 'collab', enum: [ 'admin', 'collab'] })

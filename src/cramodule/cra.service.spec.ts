@@ -7,12 +7,13 @@ import { CRA } from './Entities/cra.entity';
 import { UserService } from '../user-module/user.service';
 import { Role } from '../user-module/Entities/role.enum';
 import { User } from '../user-module/Entities/user.entity';
+import { HolidayService } from 'src/holiday-module/holiday.service';
 
 describe('CRAService', () => {
     let craService: CRAService;
     let craRepository: Repository<CRA>;
     let userService: UserService;
-
+    let holidayService:HolidayService;
     beforeEach(async () => {
 
         craRepository = {
@@ -24,7 +25,7 @@ describe('CRAService', () => {
         userService = {
             findById: jest.fn(),
         } as unknown as UserService;
-        craService = new CRAService(craRepository, userService);
+        craService = new CRAService(craRepository, userService,holidayService);
     });
 
     describe('getCRAById', () => {

@@ -7,9 +7,17 @@ import { Activity } from "src/activity-module/Entities/activity.entity";
 
 @Injectable()
 export class UserService {
-  getUserById(collabId: number) {
-    throw new Error("Method not implemented.");
-  }
+    async findOne(email: string) {
+      const user = await this.userRepository.findOne({ where: { email } });
+
+      if (user) {
+        return user;
+      }
+    
+      throw new HttpException('A user with this username/email does not exist.', HttpStatus.NOT_FOUND);
+        
+    }
+
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,

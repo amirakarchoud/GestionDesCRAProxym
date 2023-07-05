@@ -5,10 +5,12 @@ import { CRAController } from './cra.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../user-module/Entities/user.entity';
 import { UserService } from '../user-module/user.service';
+import { Holiday } from '../holiday-module/Entities/holiday.entity';
+import { HolidayService } from '../holiday-module/holiday.service';
 
 
-@Module({ imports: [TypeOrmModule.forFeature([CRA,User])],
-    providers: [CRAService,UserService],
+@Module({ imports: [TypeOrmModule.forFeature([CRA,User,Holiday])],
+    providers: [CRAService,UserService,HolidayService],
     controllers: [CRAController],
     exports: [CRAService],
   })

@@ -57,4 +57,13 @@ export class HolidayService {
       },
     });
   }
+
+  async checkDateIsHoliday(date: Date): Promise<boolean> {
+    const startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const endDate = new Date(startDate.getTime() + 24 * 60 * 60 * 1000); 
+    const holiday = await this.holidayRepository.findOne({where: {
+      date: Between(startDate, endDate),
+    }, });
+    return !!holiday;
+  }
 }

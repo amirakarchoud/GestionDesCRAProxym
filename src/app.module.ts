@@ -8,6 +8,8 @@ import { AbsenceModule } from './absence-module/absence.module';
 import { CraModule } from './cramodule/cra.module';
 import { HolidayModule } from './holiday-module/holiday.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { NotificationModule } from './notification-module/notification.module';
+import { AuthModule } from './auth-module/auth.module';
 
 @Module({
   imports: [TypeOrmModule.forRoot({
@@ -21,7 +23,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       __dirname + '/**/*.entity{.ts,.js}',
   ],
     synchronize: true,
-  }),UserModule, ProjectModule, ActivityModule, AbsenceModule, CraModule, HolidayModule
+  }),UserModule, ProjectModule, ActivityModule, AbsenceModule, CraModule, HolidayModule,NotificationModule, AuthModule
   ],
   controllers: [AppController],
   providers: [AppService],
